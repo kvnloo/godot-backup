@@ -3946,10 +3946,17 @@ void EditorPaginator::update(int p_page, int p_max_page) {
 void EditorPaginator::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_THEME_CHANGED: {
-			first_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageFirst")));
-			prev_page_button->set_button_icon(get_editor_theme_icon(SNAME("PagePrevious")));
-			next_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageNext")));
-			last_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageLast")));
+			if (get_parent_control()->is_layout_rtl()) {
+				first_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageLast")));
+				prev_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageNext")));
+				next_page_button->set_button_icon(get_editor_theme_icon(SNAME("PagePrevious")));
+				last_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageFirst")));
+			} else {
+				first_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageFirst")));
+				prev_page_button->set_button_icon(get_editor_theme_icon(SNAME("PagePrevious")));
+				next_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageNext")));
+				last_page_button->set_button_icon(get_editor_theme_icon(SNAME("PageLast")));
+			}
 		} break;
 	}
 }
@@ -3959,6 +3966,8 @@ void EditorPaginator::_bind_methods() {
 }
 
 EditorPaginator::EditorPaginator() {
+	bool rtl = is_layout_rtl();
+	set_layout_direction(LayoutDirection::LAYOUT_DIRECTION_LTR);
 	set_h_size_flags(SIZE_EXPAND_FILL);
 	set_alignment(ALIGNMENT_CENTER);
 
@@ -3966,35 +3975,46 @@ EditorPaginator::EditorPaginator() {
 	first_page_button->set_accessibility_name(TTRC("First Page"));
 	first_page_button->set_flat(true);
 	first_page_button->connect(SceneStringName(pressed), callable_mp(this, &EditorPaginator::_first_page_button_pressed));
-	add_child(first_page_button);
 
 	prev_page_button = memnew(Button);
 	prev_page_button->set_accessibility_name(TTRC("Previous Page"));
 	prev_page_button->set_flat(true);
 	prev_page_button->connect(SceneStringName(pressed), callable_mp(this, &EditorPaginator::_prev_page_button_pressed));
-	add_child(prev_page_button);
 
 	page_line_edit = memnew(LineEdit);
 	page_line_edit->set_accessibility_name(TTRC("Page Number"));
 	page_line_edit->connect(SceneStringName(text_submitted), callable_mp(this, &EditorPaginator::_page_line_edit_text_submitted));
 	page_line_edit->add_theme_constant_override("minimum_character_width", 2);
-	add_child(page_line_edit);
 
 	page_count_label = memnew(Label);
 	page_count_label->set_focus_mode(FOCUS_ACCESSIBILITY);
-	add_child(page_count_label);
 
 	next_page_button = memnew(Button);
 	next_page_button->set_accessibility_name(TTRC("Next Page"));
 	next_page_button->set_flat(true);
 	next_page_button->connect(SceneStringName(pressed), callable_mp(this, &EditorPaginator::_next_page_button_pressed));
-	add_child(next_page_button);
 
 	last_page_button = memnew(Button);
 	last_page_button->set_accessibility_name(TTRC("Last Page"));
 	last_page_button->set_flat(true);
 	last_page_button->connect(SceneStringName(pressed), callable_mp(this, &EditorPaginator::_last_page_button_pressed));
-	add_child(last_page_button);
+
+	if (rtl) {
+		add_child(last_page_button);
+		add_child(next_page_button);
+		page_line_edit->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_RIGHT);
+		add_child(page_line_edit);
+		add_child(page_count_label);
+		add_child(prev_page_button);
+		add_child(first_page_button);
+	} else {
+		add_child(first_page_button);
+		add_child(prev_page_button);
+		add_child(page_line_edit);
+		add_child(page_count_label);
+		add_child(next_page_button);
+		add_child(last_page_button);
+	}
 }
 
 ////////////////////////////////////////////////
